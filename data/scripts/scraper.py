@@ -29,18 +29,21 @@ def download_from_uri(arg):
                                "{0}?client_id={1}".format(uri, _public_key), shell=True)
     proc.wait()
                       
-def get_tracks(pool, count, query):
+def get_tracks(pool, count, query, genre=None):
     print _public_key
     client = soundcloud.Client(client_id=_public_key)
     tracks = client.get('/tracks', q=query, limit=count, license='cc-by')
     
-    args = [(track.download_url, track.title) for track in tracks if track.download_url]
+    args = [(track.stream_url, track.title) for track in tracks if track.download_url]
     for arg in args:
-        print "{0}: Download from {1}".format(arg[1].encode("utf-8"), 
+        print "{0}: Stream from (downloadable) {1}".format(arg[1].encode("utf-8"), 
                                               arg[0])
-
+    
     try:
         pool.map_async(download_from_uri, args).get()
+        pool.close()
+        pool.join()    
+            
     except KeyboardInterrupt:
         print "Stopping all downloads"
         pool.terminate()
@@ -49,8 +52,8 @@ def get_tracks(pool, count, query):
 if __name__ == '__main__':
     
     # default query
-    query = "fetty wap"
-    
+    query = "nsync"
+
     if len(sys.argv) > 1:
         query = sys.argv[1]
     with open("API_KEY", 'r') as f:
