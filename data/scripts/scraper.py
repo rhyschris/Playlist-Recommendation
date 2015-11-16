@@ -1,6 +1,7 @@
 __author__ = "rhyschris"
 
 import soundcloud
+import shlex
 import subprocess
 import sys
 import signal
@@ -24,23 +25,32 @@ def download_from_uri(arg):
     """ Start method for the threads to download to file """
 
     uri, title = arg
-    filepath = "../raw/{0}".format(title)
-    proc = subprocess.Popen("wget --content-disposition " +
-                               "{0}?client_id={1}".format(uri, _public_key), shell=True)
-    proc.wait()
 
-def get_tracks(pool, count, query):
+    filepath = ur"../raw/{0}".format(unicode( '_'.join(title.split(' '))))
+
+    cmd = "wget -O {0}.mp3 {1}?client_id={2}".format(filepath, uri, _public_key)
+
+    proc = subprocess.Popen(shlex.split(cmd))
+    proc.wait()
+    print "DONE"
+
+def get_tracks(pool, count, query, gen=None):
     print _public_key
     client = soundcloud.Client(client_id=_public_key)
-    tracks = client.get('/tracks', q=query, limit=count, license='cc-by')
+    tracks = client.get('/tracks', q=query, genre=gen, limit=count)
 
-    args = [(track.download_url, track.title) for track in tracks if track.download_url]
+    args = [(track.stream_url, track.title.encode("utf-8")) for track in tracks if track.stream_url]
     for arg in args:
-        print "{0}: Download from {1}".format(arg[1].encode("utf-8"),
+        print "{0}: Stream from {1}".format(arg[1],
                                               arg[0])
+
 
     try:
         pool.map_async(download_from_uri, args).get()
+        pool.close()
+        print "POOL CLOSING"
+        pool.join()
+
     except KeyboardInterrupt:
         print "Stopping all downloads"
         pool.terminate()
@@ -49,8 +59,9 @@ def get_tracks(pool, count, query):
 if __name__ == '__main__':
 
     # default query
-    query = "blue stahli"
 
+    query = "Blue Stahli"
+    genre = None
     if len(sys.argv) > 1:
         query = sys.argv[1]
     with open("API_KEY", 'r') as f:
@@ -59,6 +70,7 @@ if __name__ == '__main__':
     # Change to the "raw" directory for wget a
     # for more seamless use of --content-disposition
     os.chdir("/media/Elements/raw")
-    get_tracks (mp.Pool(4), 50, query)
-    #os.chdir("../scripts")
+    get_tracks (mp.Pool(4), 10, query, genre)
+    print "DONE ALL"
+    os.chdir("../scripts")
 
