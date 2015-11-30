@@ -2,7 +2,7 @@ import sys
 import subprocess
 import shlex
 import re
-
+import glob
 ''' Splices raw data.
 
     Input parameters:
@@ -19,7 +19,9 @@ import re
 
 '''
 
-filename = sys.argv[1].encode("utf-8")
+
+filename = sys.argv[1]
+print filename
 # Youtube comment of description
 description = sys.argv[2]
 
@@ -46,8 +48,9 @@ with open(description, 'r') as f:
         
         ind = l[end:].find(' ')
         title = l[end + ind + 1:]
-        titles.append(title)
 
+        titles.append('_'.join(title.split(' ')))
+    
 # Calculate the time needed for each clip
 
 real_start = []
