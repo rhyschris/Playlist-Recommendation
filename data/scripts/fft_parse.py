@@ -18,6 +18,8 @@ Usage: python fft_parse.py [input_directory_path] [output_directory_path]
 [num_fft_samples_from_first_song_of_transition_pair]
 [num_fft_samples_from_second_song_of_transition_pair]
 [num_bins_in_fft]
+[label]
+[unique_name]
 
 Output: fftTransitions.txt file in the output directory folder having
 		a list of tuples (x_i,y_i)
@@ -28,16 +30,21 @@ def main():
 	args = sys.argv
 	inputDir = args[1]
 	outputDir = args[2]
-	numPrev = args[3]
-	numNext = args[4]
-	numBins = args[5]
+	numPrev = int(args[3])
+	numNext = int(args[4])
+	numBins = int(args[5])
+	label = args[6]
+	unique_name = args[7]
 	fftCompleteList = parseInput(inputDir)
-	transitionList = findTransitions(fftCompleteList,numPrev,numNext,numBins)
-	outputf = open(os.path.join(outputDir, "fftTransitions.txt"), 'w')
+	transitionList = findTransitions(fftCompleteList,numPrev,numNext,numBins,label)
+	name = unique_name + "-prev-" + str(numPrev) + "-next-" + str(numNext) + "-bins-" + str(numBins) + "-label-" + label
+	outputf = open(outputDir + "/" + name, 'w')
 	print(outputf)
 	print(len(transitionList))
+	outputf.write(str( numBins * (numPrev + numNext) ) + "\n")
 	for item in transitionList:
 		outputf.write("%s\n" % str(item))
+	outputf.close()
 
 
 
@@ -48,22 +55,22 @@ def parseInput(inputDir):
 		count = 0;
 		for fname in files:
 			print("Found " + fname)
-			if 'linear' in fname or 'Linear' in fname:
-				fullpath = os.path.abspath(os.path.join(root,fname))
-				f = open(fullpath, 'r')
-				fftFile.append(f.readlines())
+			#if 'linear' in fname or 'Linear' in fname:
+			fullpath = os.path.abspath(os.path.join(root,fname))
+			f = open(fullpath, 'r')
+			fftFile.append(f.readlines())
 		if fftFile:
 			fftCompleteList.append(fftFile)
 
 	return fftCompleteList
 
-def findTransitions(fftCompleteList,numPrev,numNext,numBins):
+def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 	numPlaylists = len(fftCompleteList)
 	outerCount = 0
 	transitionList = []
-	numPrev = int(numPrev)
-	numNext = int(numNext)
-	numBins = int(numBins)
+	numPrev = numPrev
+	numNext = numNext
+	numBins = numBins
 	i = iter(fftCompleteList)
 	while outerCount < numPlaylists:
 		innerCount = 0
@@ -98,7 +105,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins):
 				start = end
 
 			combList = " ".join(map(str,list(combList)))
-			transitionList.append((combList,1))
+			transitionList.append(combList + " " + label)
 			prev = next
 			innerCount = innerCount + 1
 
