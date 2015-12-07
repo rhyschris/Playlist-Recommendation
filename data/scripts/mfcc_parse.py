@@ -55,10 +55,9 @@ def parseInput(inputDir):
 		count = 0;
 		for fname in files:
 			print("Found " + fname)
-			if 'linear' in fname or 'Linear' in fname:
-				fullpath = os.path.abspath(os.path.join(root,fname))
-				f = open(fullpath, 'r')
-				fftFile.append(f.readlines())
+			fullpath = os.path.abspath(os.path.join(root,fname))
+			f = open(fullpath, 'r')
+			fftFile.append(f.readlines())
 		if fftFile:
 			fftCompleteList.append(fftFile)
 
@@ -70,14 +69,12 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 	transitionList = []
 	i = iter(fftCompleteList)
 	numTrans = 0
-	print "Number of playlists: " + str(numPlaylists)
 	while outerCount < numPlaylists:
 		innerCount = 0
 		innerList = i.next()
 		maxInner = len(innerList)
 		j = iter(innerList)
 		prev = j.next()
-		print "Number of songs in playlist: " + str(maxInner)
 		while innerCount < maxInner-1:
 			next = j.next()
 			maxLines = len(prev)
@@ -86,7 +83,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 			end = 0
 
 			if(numPrev > maxLines):
-				print "The number of FFT samples requested is greater than the number of FFT samples available" 
+				print "The number of MFCC samples requested is greater than the number of MFCC samples available" 
 				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
 				sys.exit(1)
 			for a in range(maxLines-numPrev,maxLines):
@@ -98,7 +95,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 
 			maxLines = len(next)
 			if(numNext > maxLines):
-				print "The number of FFT samples requested is greater than the number of FFT samples available"
+				print "The number of MFCC samples requested is greater than the number of MFCC samples available"
 				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
 				sys.exit(1)
 			for a in range(1,numNext+1):
@@ -113,7 +110,6 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 			transitionList.append(combList + " " + label)
 			prev = next
 			innerCount = innerCount + 1
-			print "Finished transition" + str(numTrans)
 
 		outerCount = outerCount + 1
 
