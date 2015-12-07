@@ -84,9 +84,9 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 			end = 0
 
 			if(numPrev > maxLines):
-				print("The number of FFT samples requested is greater than the number of FFT samples available")
-				print("Failed at song number:" + str(innerCount + 1 " in playlist number: "+ str(outerCount +1))
-				sys.exit()
+				print "The number of FFT samples requested is greater than the number of FFT samples available" 
+				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
+				sys.exit(1)
 			for a in range(maxLines-numPrev,maxLines):
 				end = start + numBins
 				splitRes = prev[a].split(" ")
@@ -96,9 +96,9 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 
 			maxLines = len(next)
 			if(numNext > maxLines):
-				print("The number of FFT samples requested is greater than the number of FFT samples available")
-				print("Failed at song number:" + str(innerCount + 1 " in playlist number: "+ str(outerCount +1))
-				sys.exit()
+				print "The number of FFT samples requested is greater than the number of FFT samples available"
+				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
+				sys.exit(1)
 			for a in range(1,numNext+1):
 				end = start + numBins
 				splitRes = next[a].split(" ")
