@@ -37,6 +37,8 @@ def main():
 	unique_name = args[7]
 	fftCompleteList = parseInput(inputDir)
 	transitionList = findTransitions(fftCompleteList,numPrev,numNext,numBins,label)
+	if unique_name.endswith('/'):
+		unique_name = unique_name[:-1]
 	name = unique_name + "-prev-" + str(numPrev) + "-next-" + str(numNext) + "-bins-" + str(numBins) + "-label-" + label
 	outputf = open(outputDir + "/" + name, 'w')
 	outputf.write(str( numBins * (numPrev + numNext) ) + "\n")
@@ -66,6 +68,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 	outerCount = 0
 	transitionList = []
 	i = iter(fftCompleteList)
+	numTrans = 0
 	while outerCount < numPlaylists:
 		innerCount = 0
 		innerList = i.next()
@@ -80,9 +83,9 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 			end = 0
 
 			if(numPrev > maxLines):
-				print("The number of FFT samples requested is greater than the number of FFT samples available")
-				print("Failed at song number:" + str(innerCount + 1 " in playlist number: "+ str(outerCount +1))
-				sys.exit()
+				print "The number of MFCC samples requested is greater than the number of MFCC samples available" 
+				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
+				sys.exit(1)
 			for a in range(maxLines-numPrev,maxLines):
 				end = start + numBins
 				splitRes = prev[a].split(" ")
@@ -92,9 +95,9 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 
 			maxLines = len(next)
 			if(numNext > maxLines):
-				print("The number of FFT samples requested is greater than the number of FFT samples available")
-				print("Failed at song number:" + str(innerCount + 1 " in playlist number: "+ str(outerCount +1))
-				sys.exit()
+				print "The number of MFCC samples requested is greater than the number of MFCC samples available"
+				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
+				sys.exit(1)
 			for a in range(1,numNext+1):
 				end = start + numBins
 				splitRes = next[a].split(" ")
@@ -102,6 +105,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 				combList[start:end] = finalRes
 				start = end
 
+			numTrans = numTrans + 1
 			combList = " ".join(map(str,list(combList)))
 			transitionList.append(combList + " " + label)
 			prev = next
@@ -109,6 +113,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 
 		outerCount = outerCount + 1
 
+	print "Number of transitions created: " + str(numTrans)
 	return transitionList
 
 if __name__ == "__main__":

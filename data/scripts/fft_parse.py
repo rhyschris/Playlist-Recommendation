@@ -59,8 +59,8 @@ def parseInput(inputDir):
 				fullpath = os.path.abspath(os.path.join(root,fname))
 				f = open(fullpath, 'r')
 				fftFile.append(f.readlines())
-			if fftFile:
-				fftCompleteList.append(fftFile)
+		if fftFile:
+			fftCompleteList.append(fftFile)
 
 	return fftCompleteList
 
@@ -70,12 +70,14 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 	transitionList = []
 	i = iter(fftCompleteList)
 	numTrans = 0
+	print "Number of playlists: " + str(numPlaylists)
 	while outerCount < numPlaylists:
 		innerCount = 0
 		innerList = i.next()
 		maxInner = len(innerList)
 		j = iter(innerList)
 		prev = j.next()
+		print "Number of songs in playlist: " + str(maxInner)
 		while innerCount < maxInner-1:
 			next = j.next()
 			maxLines = len(prev)
@@ -111,6 +113,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 			transitionList.append(combList + " " + label)
 			prev = next
 			innerCount = innerCount + 1
+			print "Finished transition" + str(numTrans)
 
 		outerCount = outerCount + 1
 
