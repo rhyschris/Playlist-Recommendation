@@ -22,7 +22,7 @@ Usage: python fft_parse.py [input_directory_path] [output_directory_path]
 Output: fftTransitions.txt file in the output directory folder having
 		a list of tuples (x_i,y_i)
 
-'''  
+'''
 
 def main():
 	args = sys.argv
@@ -33,7 +33,9 @@ def main():
 	numBins = args[5]
 	fftCompleteList = parseInput(inputDir)
 	transitionList = findTransitions(fftCompleteList,numPrev,numNext,numBins)
-	outputf = open(outputDir + "fftTransitions.txt", 'w')
+	outputf = open(os.path.join(outputDir, "fftTransitions.txt"), 'w')
+	print(outputf)
+	print(len(transitionList))
 	for item in transitionList:
 		outputf.write("%s\n" % str(item))
 
@@ -45,6 +47,7 @@ def parseInput(inputDir):
 		fftFile = []
 		count = 0;
 		for fname in files:
+			print("Found " + fname)
 			if 'linear' in fname or 'Linear' in fname:
 				fullpath = os.path.abspath(os.path.join(root,fname))
 				f = open(fullpath, 'r')
@@ -104,8 +107,8 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins):
 	return transitionList
 
 
-			
-	
+
+
 
 
 
