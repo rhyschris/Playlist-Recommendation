@@ -25,6 +25,7 @@ Output: fftTransitions.txt file in the output directory folder having
 		a list of tuples (x_i,y_i)
 
 '''
+numbers = re.compile(r'(\d+)')
 
 def main():
 	args = sys.argv
@@ -53,7 +54,7 @@ def parseInput(inputDir):
 	for root, subFolders, files in os.walk(inputDir):
 		fftFile = []
 		count = 0;
-		for fname in files:
+		for fname in sorted(files,key=numericalSort):
 			print("Found " + fname)
 			if 'linear' in fname or 'Linear' in fname:
 				fullpath = os.path.abspath(os.path.join(root,fname))
@@ -63,6 +64,11 @@ def parseInput(inputDir):
 			fftCompleteList.append(fftFile)
 
 	return fftCompleteList
+
+def numericalSort(value):
+	parts = numbers.split(value)
+	parts[1::2] = map(int, parts[1::2])
+	return parts
 
 def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 	numPlaylists = len(fftCompleteList)
@@ -85,6 +91,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 			start = 0;
 			end = 0
 
+			print(maxLines)
 			if(numPrev > maxLines):
 				print "The number of FFT samples requested is greater than the number of FFT samples available" 
 				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
@@ -97,6 +104,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 				start = end
 
 			maxLines = len(next)
+			print(maxLines)
 			if(numNext > maxLines):
 				print "The number of FFT samples requested is greater than the number of FFT samples available"
 				print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
@@ -113,7 +121,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 			transitionList.append(combList + " " + label)
 			prev = next
 			innerCount = innerCount + 1
-			print "Finished transition" + str(numTrans)
+			print "Finished transition " + str(numTrans)
 
 		outerCount = outerCount + 1
 
