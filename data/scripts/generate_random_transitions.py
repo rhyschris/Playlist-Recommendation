@@ -85,7 +85,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label, numExamples):
 		end = 0
 
 		if(numPrev > maxLines):
-			print "The number of MFCC samples requested is greater than the number of MFCC samples available" 
+			print "The number of FFT/MFCC samples requested is greater than the number of FFT/MFCC samples available" 
 			print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
 			sys.exit(1)
 
@@ -98,7 +98,7 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label, numExamples):
 
 		maxLines = len(next)
 		if(numNext > maxLines):
-			print "The number of MFCC samples requested is greater than the number of MFCC samples available"
+			print "The number of FFT/MFCC samples requested is greater than the number of FFT/MFCC samples available"
 			print "Failed at song number:" + str(innerCount + 1) + " in playlist number: " + str(outerCount +1) 
 			sys.exit(1)
 
