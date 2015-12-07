@@ -37,8 +37,6 @@ def main():
 	unique_name = args[7]
 	fftCompleteList = parseInput(inputDir)
 	transitionList = findTransitions(fftCompleteList,numPrev,numNext,numBins,label)
-	if unique_name.endswith('/'):
-		unique_name = unique_name[:-1]
 	name = unique_name + "-prev-" + str(numPrev) + "-next-" + str(numNext) + "-bins-" + str(numBins) + "-label-" + label
 	outputf = open(outputDir + "/" + name, 'w')
 	outputf.write(str( numBins * (numPrev + numNext) ) + "\n")
@@ -55,12 +53,11 @@ def parseInput(inputDir):
 		count = 0;
 		for fname in files:
 			print("Found " + fname)
-			if 'linear' in fname or 'Linear' in fname:
-				fullpath = os.path.abspath(os.path.join(root,fname))
-				f = open(fullpath, 'r')
-				fftFile.append(f.readlines())
-			if fftFile:
-				fftCompleteList.append(fftFile)
+			fullpath = os.path.abspath(os.path.join(root,fname))
+			f = open(fullpath, 'r')
+			fftFile.append(f.readlines())
+		if fftFile:
+			fftCompleteList.append(fftFile)
 
 	return fftCompleteList
 
@@ -69,7 +66,6 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 	outerCount = 0
 	transitionList = []
 	i = iter(fftCompleteList)
-	numTrans = 0
 	while outerCount < numPlaylists:
 		innerCount = 0
 		innerList = i.next()
@@ -106,7 +102,6 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 				combList[start:end] = finalRes
 				start = end
 
-			numTrans = numTrans + 1
 			combList = " ".join(map(str,list(combList)))
 			transitionList.append(combList + " " + label)
 			prev = next
@@ -114,7 +109,6 @@ def findTransitions(fftCompleteList,numPrev,numNext,numBins,label):
 
 		outerCount = outerCount + 1
 
-	print "Number of transitions created: " + str(numTrans)
 	return transitionList
 
 if __name__ == "__main__":
