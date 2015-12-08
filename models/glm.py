@@ -114,11 +114,11 @@ class AdagradClassifier(Classifier):
         return self.theta
 ''' Implements Logistic Regression with l2 regularization '''
 class LogisticClassifier(AdagradClassifier):
-    def __init__(self, epochs=None, reg=0.001):
+    def __init__(self, epochs=None, reg=0.001, alph=0.1):
         super(AdagradClassifier, self).__init__()
         self.bottom = 1.0
         self.epochs = epochs if epochs else 20
-        self.alpha = (lambda it : 0.02 - 0.001 * it)
+        self.alpha = alph
         self.reg = reg
 
     def predictor(self, x_i):
