@@ -17,7 +17,7 @@ _datadir = "../data/finished"
 	.... 
 
 '''
-def load(filename):
+def load(filename, plusminus=False):
 
 	data = []
 	with open( "{0}/{1}.txt".format(_datadir, filename), 'r') as f:
@@ -28,6 +28,8 @@ def load(filename):
 			else:
 				split = [float(num) for num in line.split(' ')]
 				x, y = np.array(split[:n]), int(split[-1])
+				if y == 0:
+					y = -1	
 				data.append((x, y))
 			linecount += 1
 	return data
@@ -35,17 +37,24 @@ def load(filename):
 
 ''' Performs any averaging on feature sets'''
 def preprocess(dataset):
-	# Stub: do nothing yet
-	return dataset
+	# Apply subsets of features here.
+	processed = []
+	for x, y in dataset:
+		n = x.size
+		processed.append( (np.array(list(x)[ int(n*0.4): int(n*0.6) ] ), y))
+	return processed
 
 ''' Entry point for loading and running a dataset.  '''
 def main():
-	train_set = preprocess( load('train'))
-	test_set = preprocess( load('test'))
+	train_set = preprocess( load('train', True))
+	test_set = preprocess( load('test', True))
 
-	model = glm.LogisticClassifier(epochs=20, reg=0.001, alph=1.0)
+	model = glm.LeastSquaresClassifier()
+
 	model.train(train_set)
+	print "Train performance:"
 	model.test(train_set)
+	print "Test performance:"
 	model.test(test_set)
 
 if __name__ == '__main__':
