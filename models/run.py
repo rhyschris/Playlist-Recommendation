@@ -49,7 +49,7 @@ def main():
 	train_set = preprocess( load('train', True))
 	test_set = preprocess( load('test', True))
 
-	model = glm.LeastSquaresClassifier()
+	model = glm.HingeLossClassifier()
 
 	model.train(train_set)
 	print "Train performance:"
