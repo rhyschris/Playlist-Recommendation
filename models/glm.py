@@ -116,7 +116,7 @@ class AdagradClassifier(Classifier):
 class LogisticClassifier(AdagradClassifier):
     def __init__(self, epochs=None, reg=0.001, alph=0.1):
         super(AdagradClassifier, self).__init__()
-        self.bottom = 1.0
+        self.bottom= 1e-2
         self.epochs = epochs if epochs else 20
         self.alpha = lambda it: alph
         self.reg = reg
@@ -135,13 +135,12 @@ class LogisticClassifier(AdagradClassifier):
 class LeastSquaresClassifier(Classifier):
     def __init__(self, epochs=None, reg=0.001):
 
-        self.bottom = 0.1
         self.epochs = epochs if epochs else 50
         self.alpha = lambda it: 0.03
         self.reg = reg
     
     def predictor(self, x_i):
-        return 1 if np.dot(self.theta, x_i) > 0.0 else 0
+        return 1 if np.dot(self.theta, x_i) >= 0.0 else 0
     
     def df_theta(self, x_i, y_i):
         return (np.dot(self.theta, x_i) - y_i) * x_i + self.reg * self.theta

@@ -28,7 +28,7 @@ def load(filename, plusminus=False):
 			else:
 				split = [float(num) for num in line.split(' ')]
 				x, y = np.array(split[:n]), int(split[-1])
-				if y == 0:
+				if plusminus and y == 0:
 					y = -1	
 				data.append((x, y))
 			linecount += 1
@@ -37,25 +37,27 @@ def load(filename, plusminus=False):
 
 ''' Performs any averaging on feature sets'''
 def preprocess(dataset):
-	# Apply subsets of features here.
-	processed = []
-	for x, y in dataset:
+	s = []
+
+	for x,y in dataset:
 		n = x.size
-		processed.append( (np.array(list(x)[ int(n*0.4): int(n*0.6) ] ), y))
-	return processed
+		s.append((x, y))
+	return s
 
 ''' Entry point for loading and running a dataset.  '''
 def main():
-	train_set = preprocess( load('train', True))
-	test_set = preprocess( load('test', True))
-
-	model = glm.HingeLossClassifier()
-
+	train_set = preprocess( load('train', False))
+	test_set = preprocess( load('test', False))
+	i, h, o, = 1000, 25, 1
+	model = glm.LogisticClassifier(epochs=100, reg=0, alph=5.0)
+	
 	model.train(train_set)
 	print "Train performance:"
 	model.test(train_set)
 	print "Test performance:"
 	model.test(test_set)
+
+	print i, h, o
 
 if __name__ == '__main__':
 	main()

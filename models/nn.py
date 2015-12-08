@@ -106,12 +106,12 @@ class NeuralNetwork(glm.Model):
         return np.sum(0.5 * (labels-self.output)**2)
     
     # Trains a shallow neural network using BFGS.    
-    def train_opt (self, training_data, maxiter=50, alpha = 0.05, epsilon = 1.5e-8, display_progress = False):
+    def train_opt (self, training_data, maxiter=500, alpha = 0.05, epsilon = 1.5e-8, display_progress = False):
         x_init = np.zeros(self.iweights.size + self.oweights.size)
         self.training_data = training_data
         x_init = concatMatrix(x_init, self.iweights, self.oweights, reshape=True)
 
-        res = scipy.optimize.minimize (fun=self.objective, x0 = x_init, method = 'BFGS', \
+        res = scipy.optimize.minimize (fun=self.objective, x0 = x_init, method = 'L-BFGS-B', \
                                        jac=self.gradf, tol = epsilon, \
                                        options = {'disp':True, 'maxiter' : maxiter} )
         if res.success:
@@ -139,7 +139,7 @@ class NeuralNetwork(glm.Model):
                     
     def predictor(self, ex):
         out = self.forward_propagation(ex)
-        return 1 if out > 0.5 else 0
+        return 1 if out > 0.0 else -1
     
     def hidden_representation(self, ex):
         self.forward_propagation(ex)
