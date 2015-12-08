@@ -118,7 +118,7 @@ class LogisticClassifier(AdagradClassifier):
         super(AdagradClassifier, self).__init__()
         self.bottom = 1.0
         self.epochs = epochs if epochs else 20
-        self.alpha = alph
+        self.alpha = lambda it: alph
         self.reg = reg
 
     def predictor(self, x_i):

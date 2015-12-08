@@ -43,9 +43,10 @@ def main():
 	train_set = preprocess( load('train'))
 	test_set = preprocess( load('test'))
 
-	model = glm.LogisticClassifier(epochs=200, reg=0, alph=1.0)
+	model = glm.LogisticClassifier(epochs=20, reg=0.001, alph=1.0)
 	model.train(train_set)
-	model.test(train_set)	
+	model.test(train_set)
+	model.test(test_set)
 
 if __name__ == '__main__':
 	main()
