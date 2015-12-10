@@ -18,6 +18,37 @@ class Model(object):
         y_hat = [self.predictor(x_i) for x_i, y_i in data] 
         print metrics.classification_report(y, y_hat)
 
+    def test_confidence(self, data):
+        y = [data[i][1] for i in range(len(data))]       
+        y_hat, confidence = [self.predictor(x_i) for x_i, y_i in data] 
+        #print metrics.classification_report(y, y_hat)
+
+    # If the output confidence has a probability measure, then use it.
+    def output_confidence(self, x):
+        pass
+
+    # implements leave-k-out cross-validation on the train set.
+    def cv(self, trainset, k=10, fold=False):
+        n = len(trainset) / k
+
+        y = []
+        y_hat = []
+        random.shuffle(trainset)
+
+        for i in range(n):
+            traincopy = copy.deepcopy(trainset)
+            validate = traincopy[ i * k : (i + 1)*k]
+            traincopy = traincopy[ :i*k] + trainset[k*(i + 1):]
+            
+            self.train(traincopy)
+
+            y += [validate[i][1] for i in range(k)]
+            y_hat +=  [self.predictor(x_i) for x_i, y_i in validate]
+            # Recreate the train.   
+            traincopy = traincopy[ :i*k] + validate + traincopy[i*k :] 
+
+        print metrics.classification_report(y, y_hat)
+
 # A classifier is something with a train and predict method.
 class Classifier(Model):
     
@@ -29,8 +60,8 @@ class Classifier(Model):
         num_feat = data[0][0].size
         n = len(data)
 
-        if not hasattr(self, 'theta'):
-            self.theta = np.zeros(num_feat)
+
+        self.theta = np.zeros(num_feat)
         # print self.theta
 
         for it in range(self.epochs):        
@@ -90,9 +121,10 @@ class AdagradClassifier(Classifier):
             self.epochs = epochs if epochs else 20
         self.num_params = lambda: num_feat 
         # Introspection, so that we don't redefine theta if it doesn't exist
-        if not hasattr(self, 'theta'):
-            self.theta = np.zeros(num_feat)
 
+        self.theta = np.zeros(num_feat)
+        self.theta[-1] = -1e-4 # Bias
+        
         eta = self.alpha(1)
         numex = len(data)
         G_t = self.init_Gt()
@@ -114,15 +146,16 @@ class AdagradClassifier(Classifier):
         return self.theta
 ''' Implements Logistic Regression with l2 regularization '''
 class LogisticClassifier(AdagradClassifier):
-    def __init__(self, epochs=None, reg=0.001, alph=0.1):
+    def __init__(self, epochs=None, reg=0.001, alph=0.1, threshold=0.5):
         super(AdagradClassifier, self).__init__()
         self.bottom= 1e-2
         self.epochs = epochs if epochs else 20
         self.alpha = lambda it: alph
-        self.reg = reg
+        self.reg = reg 
+        self.threshold = threshold
 
     def predictor(self, x_i):
-        return 1 if self.logistic(np.dot(self.theta, x_i)) > 0.5 else 0
+        return 1 if self.output_confidence(x_i) > self.threshold else 0
     
     def df_theta(self, x_i, y_i):
         prod = self.logistic(np.dot(self.theta, x_i))
@@ -130,6 +163,10 @@ class LogisticClassifier(AdagradClassifier):
     
     def logistic(self, z):
         return expit(z) 
+
+    # Override Model implementation
+    def output_confidence(self, x):
+        return self.logistic(np.dot(self.theta, x))
        
 ''' Least Squares Regression with l2 regularization '''
 class LeastSquaresClassifier(Classifier):
@@ -165,6 +202,11 @@ class HingeLossClassifier(Classifier):
             return -1.0 * x_i * y_i + self.reg * self.theta
         else:
             return self.reg * self.theta
+
+    # Outputs a tightened sigmoid
+    def output_confidence(self, x):
+        margin = y_i * np.dot(self.theta, x_i)
+        return 0.5 * (np.tanh(margin) + 1)
         
 """ Implements linear regression.  Not bad. """
 

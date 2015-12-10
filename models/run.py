@@ -2,6 +2,8 @@ import glm
 import nn
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
+
 ''' 
 	Runs a classifier pipeline on the playlist data set. 
 '''
@@ -27,7 +29,8 @@ def load(filename, plusminus=False):
 				n = int(line)
 			else:
 				split = [float(num) for num in line.split(' ')]
-				x, y = np.array(split[:n]), int(split[-1])
+				x_tentative = split[:n]
+				x, y = np.array(x_tentative), int(split[-1])
 				if plusminus and y == 0:
 					y = -1	
 				data.append((x, y))
@@ -36,30 +39,58 @@ def load(filename, plusminus=False):
 
 
 ''' Performs any averaging on feature sets'''
-def preprocess(dataset):
+def preprocess(dataset, nn=False):
 	s = []
-
 	for x,y in dataset:
 		n = x.size
-		s.append((x, y))
+		if nn:
+			y_vec = [0, 0]
+			y_vec[y] = 1
+		else:
+			y_vec = y
+		s.append((x, y_vec))
 	return s
 
 ''' Entry point for loading and running a dataset.  '''
-def main():
-	train_set = preprocess( load('train', False))
-	test_set = preprocess( load('test', False))
-	i, h, o, = 1000, 25, 1
-	model = glm.LogisticClassifier(epochs=100, reg=0, alph=5.0)
+def main(plot=False, cv=False):
+	train_set = preprocess( load('train', True), nn=False)
+	test_set = preprocess( load('test', True), nn=False)
 	
-	model.train(train_set)
+	i, h, o, = 1000, 20, 2
+
+	# Optimal models
+	#model = glm.LogisticClassifier(epochs=50, alpha=0.5)
+	model = nn.NeuralNetwork(i, h, o, reg=1e-5)
+	#model = glm.HingeLossClassifier(alpha=(lambda iter: 0.1), reg=0)
+	
+	#model.cv(train_set, k=43)
+	model.train_opt(train_set)
 	print "Train performance:"
 	model.test(train_set)
-	print "Test performance:"
+	#print "Test performance:"
 	model.test(test_set)
 
-	print i, h, o
+
+	if plot:
+		notes = ["A", "Bflat", "B", "C", "C#", "D", "Eflat", "E", "F", "F#", "G", "Aflat"]
+
+		x = model.theta
+		x = x.reshape(96, 200)
+		print x.shape
+		y = np.sum(x / 200, axis=1)
+		y_norm = np.log(y)
+		r = range(1, 97)
+
+		print y_norm.shape
+		print ' '.join(str(yn) for yn in y_norm)
+		#plt.bar(y_norm)
+		# labels = ["{0}{1}".format( notes[i%12], i/12) for i in r]
+
+		# plt.xlabel = "Musical notes"
+		# plt.ylabel = "Feature weights (Log)" 
+		# plt.show()
 
 if __name__ == '__main__':
-	main()
+	main(False)
 
 
