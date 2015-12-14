@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import glm
 import numpy as np
-from numpy.linalg import norm
 import scipy
 from scipy.special import expit
 from sklearn import metrics
@@ -72,7 +71,7 @@ class NeuralNetwork(glm.Model):
         for ex, labels in self.training_data:
             self.forward_propagation(ex)
             error += np.sum(labels * np.log(self.output))
-        return -error
+        return -error + self.reg / 2.0 *( np.linalg.norm(self.oweights, 'fro') + np.linalg.norm(self.iweights, 'fro'))
     
     # Gradient of the objective function.
     def gradf(self, matr):
@@ -117,10 +116,10 @@ class NeuralNetwork(glm.Model):
         self.inG += igrad * igrad
         self.outG += ograd * ograd
         return -np.sum(labels * np.log(self.output)) \
-                + self.reg / 2.0 *( np.norm(self.oweights, 'fro') + np.norm(self.iweights, 'fro'))
+                + self.reg / 2.0 *( np.linalg.norm(self.oweights, 'fro') + np.linalg.norm(self.iweights, 'fro'))
     
     # Trains a shallow neural network using BFGS.    
-    def train_opt (self, training_data, maxiter=500, alpha = 0.05, epsilon = 1.5e-8, display_progress = False):
+    def train_opt (self, training_data, maxiter=200, alpha=0.20, epsilon = 5e-5, display_progress = False):
         x_init = np.zeros(self.iweights.size + self.oweights.size)
         self.training_data = training_data
         x_init = concatMatrix(x_init, self.iweights, self.oweights, reshape=True)

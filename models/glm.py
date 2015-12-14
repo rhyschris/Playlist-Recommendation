@@ -9,6 +9,7 @@ import sklearn.metrics as metrics
 from scipy.special import expit
 import scipy
 
+
 ''' Base level model interface.  Has a train() and test() method '''
 class Model(object):
     def train(self, data, epochs=None):
@@ -33,6 +34,7 @@ class Model(object):
 
         y = []
         y_hat = []
+        y_confid = []
         random.shuffle(trainset)
 
         for i in range(n):
@@ -44,10 +46,17 @@ class Model(object):
 
             y += [validate[i][1] for i in range(k)]
             y_hat +=  [self.predictor(x_i) for x_i, y_i in validate]
+            y_confid += [ (x_i, self.output_confidence(x_i, y_i)) for x_i, y_i in validate]
+
             # Recreate the train.   
             traincopy = traincopy[ :i*k] + validate + traincopy[i*k :] 
 
         print metrics.classification_report(y, y_hat)
+        with open('confidence.txt', 'w+') as f:
+            for predicted, real, conf in zip(y, y_hat, y_confid):
+                if predicted != real:
+                    f.write("{0}|{1}\n".format(conf[1], " ".join([str(c) for c in conf[0]]) ) )
+
 
 # A classifier is something with a train and predict method.
 class Classifier(Model):
@@ -123,20 +132,23 @@ class AdagradClassifier(Classifier):
         # Introspection, so that we don't redefine theta if it doesn't exist
 
         self.theta = np.zeros(num_feat)
-        self.theta[-1] = -1e-4 # Bias
+        self.theta[-1] = 1e-4 # Bias
         
         eta = self.alpha(1)
         numex = len(data)
+
+
         G_t = self.init_Gt()
 
         for it in range(self.epochs):
             error = 0
             for x, y in data:
+
                 if y != self.predictor(x) :
                     error += 1
                 if self.shouldUpdate(x, y):
                     g_t = self.df_theta(x, y)
-                    
+                    print g_t
                     update = eta * g_t / G_t
                     G_t += (g_t * g_t)
                     self.theta -= update 
@@ -159,10 +171,14 @@ class LogisticClassifier(AdagradClassifier):
     
     def df_theta(self, x_i, y_i):
         prod = self.logistic(np.dot(self.theta, x_i))
+        print prod
+        print y_i
+        print x_i
+
         return (prod - y_i) * x_i + self.reg * self.theta
     
     def logistic(self, z):
-        return expit(z) 
+        return expit(z)
 
     # Override Model implementation
     def output_confidence(self, x):
@@ -204,9 +220,10 @@ class HingeLossClassifier(Classifier):
             return self.reg * self.theta
 
     # Outputs a tightened sigmoid
-    def output_confidence(self, x):
+    def output_confidence(self, x_i, y_i):
+
         margin = y_i * np.dot(self.theta, x_i)
-        return 0.5 * (np.tanh(margin) + 1)
+        return expit(margin * 1e5 + 0.5)
         
 """ Implements linear regression.  Not bad. """
 
